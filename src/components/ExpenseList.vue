@@ -21,7 +21,8 @@
         <p>Aucune dépense pour le moment</p>
       </div>
 
-      <div v-else class="overflow-x-auto">
+      <!-- Desktop: Table -->
+      <div v-if="expenses.length > 0" class="hidden md:block overflow-x-auto">
         <table class="table table-zebra">
           <thead>
             <tr>
@@ -71,6 +72,52 @@
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile: Cards -->
+      <div v-if="expenses.length > 0" class="md:hidden space-y-3">
+        <div
+          v-for="expense in sortedExpenses"
+          :key="expense.id"
+          class="bg-base-200 rounded-lg p-4"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex-1">
+              <p class="font-semibold">{{ expense.description }}</p>
+              <p class="text-sm text-base-content/70">{{ formatDate(expense.date) }}</p>
+            </div>
+            <div class="dropdown dropdown-end">
+              <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
+                  />
+                </svg>
+              </label>
+              <ul
+                tabindex="0"
+                class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
+              >
+                <li><a @click="$emit('edit', expense)">Modifier</a></li>
+                <li><a @click="$emit('delete', expense.id)" class="text-error">Supprimer</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="badge badge-outline">
+              {{ getCategoryName(expense.categoryId) }}
+            </span>
+            <span class="text-lg font-bold">{{ formatCurrency(expense.amount) }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

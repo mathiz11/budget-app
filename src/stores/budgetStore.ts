@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { supabase } from '@/lib/supabase'
 import { monthService } from '@/services/monthService'
 import { categoryService } from '@/services/categoryService'
 import { expenseService } from '@/services/expenseService'
@@ -206,7 +207,7 @@ export const useBudgetStore = defineStore('budget', () => {
   }
 
   /**
-   * Modifier une catégorie
+   * Modifier une catégorie (affecte tous les mois)
    */
   async function updateCategory(
     categoryId: string,
@@ -220,6 +221,49 @@ export const useBudgetStore = defineStore('budget', () => {
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur de modification de catégorie'
+      throw err
+    }
+  }
+
+  /**
+   * Modifier le budget d'une catégorie pour le mois actuel uniquement
+   */
+  async function updateCategoryForCurrentMonth(
+    categoryId: string,
+    budgetLimit: number
+  ) {
+    if (!currentMonth.value) return
+
+    try {
+      // Trouver ou créer l'entrée month_category
+      const { data: monthCategory } = await supabase
+        .from('month_categories')
+        .select('*')
+        .eq('monthId', currentMonth.value.id)
+        .eq('categoryId', categoryId)
+        .maybeSingle()
+
+      if (monthCategory) {
+        // Mettre à jour l'entrée existante
+        await categoryService.updateMonthCategoryBudget(monthCategory.id, budgetLimit)
+      } else {
+        // Créer une nouvelle entrée spécifique au mois
+        const { error } = await supabase
+          .from('month_categories')
+          .insert({
+            userId: currentMonth.value.userId,
+            monthId: currentMonth.value.id,
+            categoryId,
+            budgetLimit
+          })
+        
+        if (error) throw error
+      }
+
+      // Recharger les catégories pour refléter le changement
+      await loadCategories(currentMonth.value.userId)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : 'Erreur de modification du budget'
       throw err
     }
   }
@@ -294,6 +338,7 @@ export const useBudgetStore = defineStore('budget', () => {
     deleteExpense,
     addCategory,
     updateCategory,
+    updateCategoryForCurrentMonth,
     deleteCategory,
     initializeDefaultCategories,
     initializeMonth

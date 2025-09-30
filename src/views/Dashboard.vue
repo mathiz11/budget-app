@@ -1,42 +1,7 @@
 <template>
   <div class="min-h-screen bg-base-200">
     <!-- Header -->
-    <div class="navbar bg-base-100 shadow-lg">
-      <div class="flex-1">
-        <a class="btn btn-ghost normal-case text-xl">💰 Budget App</a>
-      </div>
-      <div class="flex-none gap-2">
-        <div class="dropdown dropdown-end">
-          <label tabindex="0" class="btn btn-ghost btn-circle">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-6 h-6"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-          </label>
-          <ul
-            tabindex="0"
-            class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-64"
-          >
-            <li class="menu-title">
-              <span class="text-xs truncate">{{ authStore.user?.email }}</span>
-            </li>
-            <li>
-              <a @click="handleSignOut" class="hover:bg-error hover:text-white">Déconnexion</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
+    <AppHeader />
 
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8">
@@ -233,6 +198,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useBudgetStore } from '@/stores/budgetStore'
+import AppHeader from '@/components/AppHeader.vue'
 import MonthSelector from '@/components/MonthSelector.vue'
 import MonthSummaryCard from '@/components/MonthSummaryCard.vue'
 import CategoryCard from '@/components/CategoryCard.vue'
@@ -325,11 +291,9 @@ const handleCategorySubmit = async (data: CategoryFormData) => {
   if (!authStore.user || !data.budgetLimit) return
 
   if (editingCategory.value) {
-    await budgetStore.updateCategory(editingCategory.value.id, {
-      name: data.name,
-      budgetLimit: data.budgetLimit,
-      icon: data.icon
-    })
+    // Modifier le budget uniquement pour le mois actuel
+    // La catégorie devient spécifique à ce mois
+    await budgetStore.updateCategoryForCurrentMonth(editingCategory.value.id, data.budgetLimit)
     editingCategory.value = null
   } else {
     await budgetStore.addCategory(authStore.user.id, data.name, data.budgetLimit, data.icon)
@@ -345,10 +309,6 @@ const handleDeleteCategory = async (categoryId: string) => {
   if (confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
     await budgetStore.deleteCategory(categoryId)
   }
-}
-
-const handleSignOut = async () => {
-  await authStore.signOut()
 }
 
 const handleInitializeMonth = async () => {

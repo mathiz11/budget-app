@@ -1,8 +1,13 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-base-200 px-4">
-    <div class="card w-full max-w-md bg-base-100 shadow-xl">
-      <div class="card-body">
-        <h2 class="card-title text-3xl font-bold text-center mb-6">Connexion</h2>
+  <div class="min-h-screen bg-base-200">
+    <!-- Header -->
+    <AppHeader />
+
+    <!-- Auth Form -->
+    <div class="flex items-center justify-center px-4 py-8">
+      <div class="card w-full max-w-md bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-3xl font-bold text-center mb-6">Connexion</h2>
 
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div class="form-control">
@@ -72,6 +77,7 @@
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   </div>
@@ -80,6 +86,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
+import AppHeader from '@/components/AppHeader.vue'
 
 const authStore = useAuthStore()
 
