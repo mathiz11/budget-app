@@ -1,22 +1,22 @@
 <template>
-  <div class="card bg-base-100 shadow-xl">
+  <div class="card bg-base-100 shadow-xl relative">
+    <!-- Badge par défaut en haut à droite -->
+    <div v-if="category.isDefault" class="absolute top-2 right-8 z-10">
+      <span class="badge badge-sm badge-success badge-outline">Par défaut</span>
+    </div>
+
     <div class="card-body">
       <div class="flex justify-between items-start mb-4">
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-1 pr-2">
           <span class="text-3xl">{{ category.icon || '📦' }}</span>
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="card-title text-lg">{{ category.name }}</h3>
-              <span v-if="category.isDefault" class="badge badge-sm badge-outline badge-info">
-                Par défaut
-              </span>
-            </div>
+          <div class="flex-1">
+            <h3 class="card-title text-lg">{{ category.name }}</h3>
             <p class="text-sm text-base-content/70">
               {{ formatCurrency(category.spent) }} / {{ formatCurrency(category.budgetLimit) }}
             </p>
           </div>
         </div>
-        <div v-if="!isVirtualCategory" class="flex gap-1">
+        <div v-if="!isVirtualCategory" class="flex gap-1 flex-shrink-0">
           <button @click="$emit('edit')" class="btn btn-sm btn-ghost btn-circle" title="Modifier">
             <svg
               xmlns="http://www.w3.org/2000/svg"

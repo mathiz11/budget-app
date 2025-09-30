@@ -111,11 +111,11 @@
               </ul>
             </div>
           </div>
-          <div class="flex justify-between items-center">
-            <span class="badge badge-outline">
+          <div class="flex justify-between items-center gap-2">
+            <span class="badge badge-outline px-3 py-3">
               {{ getCategoryName(expense.categoryId) }}
             </span>
-            <span class="text-lg font-bold">{{ formatCurrency(expense.amount) }}</span>
+            <span class="text-lg font-bold whitespace-nowrap">{{ formatCurrency(expense.amount) }}</span>
           </div>
         </div>
       </div>
