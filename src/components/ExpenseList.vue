@@ -30,7 +30,7 @@
               <th>Description</th>
               <th>Catégorie</th>
               <th class="text-right">Montant</th>
-              <th></th>
+              <th class="text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -44,29 +44,47 @@
               </td>
               <td class="text-right font-semibold">{{ formatCurrency(expense.amount) }}</td>
               <td>
-                <div class="dropdown dropdown-end">
-                  <label tabindex="0" class="btn btn-ghost btn-xs">
+                <div class="flex justify-end gap-1">
+                  <button
+                    @click="$emit('edit', expense)"
+                    class="btn btn-ghost btn-sm btn-circle"
+                    title="Modifier"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
                       class="w-4 h-4"
                     >
                       <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
                       />
                     </svg>
-                  </label>
-                  <ul
-                    tabindex="0"
-                    class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
+                  </button>
+                  <button
+                    @click="$emit('delete', expense.id)"
+                    class="btn btn-ghost btn-sm btn-circle"
+                    title="Supprimer"
                   >
-                    <li><a @click="$emit('edit', expense)">Modifier</a></li>
-                    <li><a @click="$emit('delete', expense.id)" class="text-error">Supprimer</a></li>
-                  </ul>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="w-4 h-4"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -76,46 +94,62 @@
 
       <!-- Mobile: Cards -->
       <div v-if="expenses.length > 0" class="md:hidden space-y-3">
-        <div
-          v-for="expense in sortedExpenses"
-          :key="expense.id"
-          class="bg-base-200 rounded-lg p-4"
-        >
+        <div v-for="expense in sortedExpenses" :key="expense.id" class="bg-base-200 rounded-lg p-4">
           <div class="flex justify-between items-start mb-2">
             <div class="flex-1">
               <p class="font-semibold">{{ expense.description }}</p>
               <p class="text-sm text-base-content/70">{{ formatDate(expense.date) }}</p>
             </div>
-            <div class="dropdown dropdown-end">
-              <label tabindex="0" class="btn btn-ghost btn-sm btn-circle">
+            <div class="flex gap-1">
+              <button
+                @click="$emit('edit', expense)"
+                class="btn btn-ghost btn-sm btn-circle"
+                title="Modifier"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  class="w-5 h-5"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-4 h-4"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
+                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
                   />
                 </svg>
-              </label>
-              <ul
-                tabindex="0"
-                class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
+              </button>
+              <button
+                @click="$emit('delete', expense.id)"
+                class="btn btn-ghost btn-sm btn-circle"
+                title="Supprimer"
               >
-                <li><a @click="$emit('edit', expense)">Modifier</a></li>
-                <li><a @click="$emit('delete', expense.id)" class="text-error">Supprimer</a></li>
-              </ul>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-4 h-4"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
           <div class="flex justify-between items-center gap-2">
             <span class="badge badge-outline px-3 py-3">
               {{ getCategoryName(expense.categoryId) }}
             </span>
-            <span class="text-lg font-bold whitespace-nowrap">{{ formatCurrency(expense.amount) }}</span>
+            <span class="text-lg font-bold whitespace-nowrap">{{
+              formatCurrency(expense.amount)
+            }}</span>
           </div>
         </div>
       </div>
