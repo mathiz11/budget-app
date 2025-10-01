@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import type { Category, MonthCategory } from '@/types'
+import type { Category } from '@/types'
 
 export const categoryService = {
   /**
@@ -84,10 +84,7 @@ export const categoryService = {
     const defaultCategories = await this.getDefaultCategories(userId)
 
     // Vérifier si des catégories existent déjà pour ce mois
-    const { data: existing } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('monthId', monthId)
+    const { data: existing } = await supabase.from('categories').select('*').eq('monthId', monthId)
 
     if (existing && existing.length > 0) {
       return existing
@@ -104,10 +101,7 @@ export const categoryService = {
       order: cat.order
     }))
 
-    const { data, error } = await supabase
-      .from('categories')
-      .insert(monthCategories)
-      .select()
+    const { data, error } = await supabase.from('categories').insert(monthCategories).select()
 
     if (error) throw error
     return data || []
@@ -162,37 +156,6 @@ export const categoryService = {
   },
 
   /**
-   * Récupérer les catégories d'un mois avec leurs budgets
-   */
-  async getMonthCategories(monthId: string): Promise<MonthCategory[]> {
-    const { data, error } = await supabase
-      .from('month_categories')
-      .select('*, categories(*)')
-      .eq('monthId', monthId)
-
-    if (error) throw error
-    return data || []
-  },
-
-  /**
-   * Mettre à jour le budget d'une catégorie pour un mois spécifique
-   */
-  async updateMonthCategoryBudget(
-    monthCategoryId: string,
-    budgetLimit: number
-  ): Promise<MonthCategory> {
-    const { data, error } = await supabase
-      .from('month_categories')
-      .update({ budgetLimit, updatedAt: new Date().toISOString() })
-      .eq('id', monthCategoryId)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  },
-
-  /**
    * Initialiser les catégories par défaut pour un nouvel utilisateur
    */
   async initializeDefaultCategories(userId: string): Promise<Category[]> {
@@ -206,13 +169,7 @@ export const categoryService = {
 
     const categories: Category[] = []
     for (const cat of defaultCategories) {
-      const category = await this.createCategory(
-        userId,
-        cat.name,
-        cat.budgetLimit,
-        cat.icon,
-        true
-      )
+      const category = await this.createCategory(userId, cat.name, cat.budgetLimit, cat.icon, true)
       categories.push(category)
     }
 
