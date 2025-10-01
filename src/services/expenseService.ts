@@ -6,7 +6,6 @@ export const expenseService = {
    * Créer une nouvelle dépense
    */
   async createExpense(
-    userId: string,
     monthId: string,
     categoryId: string,
     amount: number,
@@ -16,7 +15,6 @@ export const expenseService = {
     const { data, error } = await supabase
       .from('expenses')
       .insert({
-        userId,
         monthId,
         categoryId,
         amount,

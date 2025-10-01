@@ -17,6 +17,7 @@ export interface Month {
 export interface Category {
   id: string
   userId: string
+  monthId: string | null // NULL pour catégories par défaut, défini pour catégories spécifiques au mois
   name: string
   budgetLimit: number
   icon?: string
@@ -26,6 +27,7 @@ export interface Category {
   updatedAt: string
 }
 
+// MonthCategory n'est plus utilisé - conservé pour compatibilité temporaire
 export interface MonthCategory {
   id: string
   userId: string
@@ -38,7 +40,6 @@ export interface MonthCategory {
 
 export interface Expense {
   id: string
-  userId: string
   monthId: string
   categoryId: string
   amount: number

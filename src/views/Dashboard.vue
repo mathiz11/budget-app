@@ -266,9 +266,8 @@ const handleUpdateRevenue = async (revenue: number) => {
 }
 
 const handleAddExpense = async (data: ExpenseFormData) => {
-  if (!authStore.user || !data.amount) return
+  if (!data.amount) return
   await budgetStore.addExpense(
-    authStore.user.id,
     data.categoryId,
     data.amount,
     data.description,

@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
 import { monthService } from '@/services/monthService'
 import { categoryService } from '@/services/categoryService'
 import { expenseService } from '@/services/expenseService'
@@ -63,7 +62,7 @@ export const useBudgetStore = defineStore('budget', () => {
       // Si le mois existe, charger les catégories et dépenses
       if (currentMonth.value) {
         await Promise.all([
-          loadCategories(userId),
+          loadCategories(currentMonth.value.id),
           loadExpenses(currentMonth.value.id)
         ])
       } else {
@@ -80,11 +79,11 @@ export const useBudgetStore = defineStore('budget', () => {
   }
 
   /**
-   * Charger les catégories
+   * Charger les catégories spécifiques au mois
    */
-  async function loadCategories(userId: string) {
+  async function loadCategories(monthId: string) {
     try {
-      categories.value = await categoryService.getDefaultCategories(userId)
+      categories.value = await categoryService.getMonthSpecificCategories(monthId)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur de chargement des catégories'
       throw err
@@ -121,7 +120,6 @@ export const useBudgetStore = defineStore('budget', () => {
    * Ajouter une dépense
    */
   async function addExpense(
-    userId: string,
     categoryId: string,
     amount: number,
     description: string,
@@ -131,7 +129,6 @@ export const useBudgetStore = defineStore('budget', () => {
 
     try {
       const expense = await expenseService.createExpense(
-        userId,
         currentMonth.value.id,
         categoryId,
         amount,
@@ -178,7 +175,7 @@ export const useBudgetStore = defineStore('budget', () => {
   }
 
   /**
-   * Ajouter une catégorie
+   * Ajouter une catégorie spécifique au mois actuel
    */
   async function addCategory(
     userId: string,
@@ -186,20 +183,17 @@ export const useBudgetStore = defineStore('budget', () => {
     budgetLimit: number,
     icon?: string
   ) {
+    if (!currentMonth.value) return
+
     try {
-      const category = await categoryService.createCategory(
+      const category = await categoryService.createMonthCategory(
         userId,
+        currentMonth.value.id,
         name,
         budgetLimit,
-        icon,
-        true
+        icon
       )
       categories.value.push(category)
-
-      // Ajouter la catégorie au mois actuel si nécessaire
-      if (currentMonth.value) {
-        await categoryService.copyCategoriesToMonth(userId, currentMonth.value.id)
-      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : "Erreur d'ajout de catégorie"
       throw err
@@ -207,7 +201,7 @@ export const useBudgetStore = defineStore('budget', () => {
   }
 
   /**
-   * Modifier une catégorie (affecte tous les mois)
+   * Modifier une catégorie spécifique au mois
    */
   async function updateCategory(
     categoryId: string,
@@ -226,7 +220,7 @@ export const useBudgetStore = defineStore('budget', () => {
   }
 
   /**
-   * Modifier le budget d'une catégorie pour le mois actuel uniquement
+   * Modifier le budget d'une catégorie pour le mois actuel
    */
   async function updateCategoryForCurrentMonth(
     categoryId: string,
@@ -235,33 +229,11 @@ export const useBudgetStore = defineStore('budget', () => {
     if (!currentMonth.value) return
 
     try {
-      // Trouver ou créer l'entrée month_category
-      const { data: monthCategory } = await supabase
-        .from('month_categories')
-        .select('*')
-        .eq('monthId', currentMonth.value.id)
-        .eq('categoryId', categoryId)
-        .maybeSingle()
-
-      if (monthCategory) {
-        // Mettre à jour l'entrée existante
-        await categoryService.updateMonthCategoryBudget(monthCategory.id, budgetLimit)
-      } else {
-        // Créer une nouvelle entrée spécifique au mois
-        const { error } = await supabase
-          .from('month_categories')
-          .insert({
-            userId: currentMonth.value.userId,
-            monthId: currentMonth.value.id,
-            categoryId,
-            budgetLimit
-          })
-        
-        if (error) throw error
-      }
-
+      // Mettre à jour directement la catégorie spécifique au mois
+      await categoryService.updateCategory(categoryId, { budgetLimit })
+      
       // Recharger les catégories pour refléter le changement
-      await loadCategories(currentMonth.value.userId)
+      await loadCategories(currentMonth.value.id)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Erreur de modification du budget'
       throw err
@@ -306,12 +278,12 @@ export const useBudgetStore = defineStore('budget', () => {
       // Créer le mois
       currentMonth.value = await monthService.createMonth(userId, year, month)
 
-      // Copier les catégories par défaut vers le nouveau mois
-      await categoryService.copyCategoriesToMonth(userId, currentMonth.value.id)
+      // Dupliquer les catégories par défaut vers le nouveau mois
+      await categoryService.duplicateDefaultCategoriesToMonth(userId, currentMonth.value.id)
 
       // Charger les catégories et dépenses
       await Promise.all([
-        loadCategories(userId),
+        loadCategories(currentMonth.value.id),
         loadExpenses(currentMonth.value.id)
       ])
     } catch (err) {

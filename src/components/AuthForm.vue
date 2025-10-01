@@ -85,9 +85,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import AppHeader from '@/components/AppHeader.vue'
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 const email = ref('')
@@ -191,6 +193,8 @@ const handleSubmit = async () => {
     await authStore.signIn(email.value, password.value)
     // Connexion réussie, réinitialiser les tentatives
     resetAttempts()
+    // Rediriger vers le dashboard
+    router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
     // Incrémenter les tentatives échouées

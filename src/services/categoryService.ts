@@ -77,15 +77,15 @@ export const categoryService = {
   },
 
   /**
-   * Copier les catégories par défaut vers un mois
+   * Dupliquer les catégories par défaut pour un mois spécifique
    */
-  async copyCategoriesToMonth(userId: string, monthId: string): Promise<MonthCategory[]> {
+  async duplicateDefaultCategoriesToMonth(userId: string, monthId: string): Promise<Category[]> {
     // Récupérer les catégories par défaut
     const defaultCategories = await this.getDefaultCategories(userId)
 
-    // Vérifier si les catégories existent déjà pour ce mois
+    // Vérifier si des catégories existent déjà pour ce mois
     const { data: existing } = await supabase
-      .from('month_categories')
+      .from('categories')
       .select('*')
       .eq('monthId', monthId)
 
@@ -93,21 +93,72 @@ export const categoryService = {
       return existing
     }
 
-    // Créer les month_categories
+    // Créer des copies spécifiques au mois
     const monthCategories = defaultCategories.map((cat) => ({
       userId,
       monthId,
-      categoryId: cat.id,
-      budgetLimit: cat.budgetLimit
+      name: cat.name,
+      budgetLimit: cat.budgetLimit,
+      icon: cat.icon,
+      isDefault: false, // Catégorie spécifique au mois
+      order: cat.order
     }))
 
     const { data, error } = await supabase
-      .from('month_categories')
+      .from('categories')
       .insert(monthCategories)
       .select()
 
     if (error) throw error
     return data || []
+  },
+
+  /**
+   * Récupérer les catégories spécifiques à un mois
+   */
+  async getMonthSpecificCategories(monthId: string): Promise<Category[]> {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('monthId', monthId)
+      .order('order')
+
+    if (error) throw error
+    return data || []
+  },
+
+  /**
+   * Créer une catégorie spécifique à un mois
+   */
+  async createMonthCategory(
+    userId: string,
+    monthId: string,
+    name: string,
+    budgetLimit: number,
+    icon?: string
+  ): Promise<Category> {
+    // Récupérer le nombre de catégories pour ce mois
+    const { count } = await supabase
+      .from('categories')
+      .select('*', { count: 'exact', head: true })
+      .eq('monthId', monthId)
+
+    const { data, error } = await supabase
+      .from('categories')
+      .insert({
+        userId,
+        monthId,
+        name,
+        budgetLimit,
+        icon,
+        isDefault: false, // Spécifique au mois
+        order: count || 0
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
   },
 
   /**

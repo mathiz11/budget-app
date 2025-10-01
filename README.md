@@ -8,16 +8,19 @@ Budget App est une Single Page Application (SPA) qui vous permet de :
 
 - 📊 Visualiser votre budget mensuel en temps réel
 - 💸 Suivre vos dépenses par catégories personnalisables
+- 🏷️ Gérer vos catégories par défaut (templates pour nouveaux mois)
 - 📈 Analyser vos habitudes de consommation
 - 🎯 Respecter vos limites budgétaires avec des alertes visuelles
 - 📅 Naviguer facilement entre les mois et initialiser de nouveaux budgets
+- 🔒 Authentification sécurisée avec Supabase Auth
 
 ## 🛠️ Stack Technique
 
 **Frontend**
 
 - Vue.js 3 (Composition API) + TypeScript
-- Tailwind CSS + DaisyUI
+- Vue Router 4 (navigation)
+- Tailwind CSS + DaisyUI (UI)
 - Pinia (gestion d'état)
 - Vite (build tool)
 
@@ -25,6 +28,7 @@ Budget App est une Single Page Application (SPA) qui vous permet de :
 
 - Supabase (PostgreSQL + Auth)
 - Row Level Security (RLS)
+- Architecture simplifiée des catégories (v2.0)
 
 **Outils**
 
@@ -61,6 +65,7 @@ L'application sera accessible sur **http://localhost:5173**
 budget-app/
 ├── src/
 │   ├── components/          # Composants Vue réutilisables
+│   │   ├── AppHeader.vue
 │   │   ├── AuthForm.vue
 │   │   ├── CategoryCard.vue
 │   │   ├── CategoryModal.vue
@@ -81,13 +86,15 @@ budget-app/
 │   ├── types/               # Types TypeScript
 │   │   └── index.ts
 │   ├── views/               # Vues principales
-│   │   └── Dashboard.vue
+│   │   ├── Dashboard.vue
+│   │   └── DefaultCategories.vue
+│   ├── router/              # Configuration du routeur
+│   │   └── index.ts
 │   ├── lib/                 # Configuration
 │   │   └── supabase.ts
 │   ├── App.vue              # Composant racine
 │   ├── main.ts              # Point d'entrée
 │   └── style.css            # Styles globaux
-├── supabase-schema.sql      # Schema de base de données
 ├── package.json
 ├── tsconfig.json
 ├── vite.config.ts
