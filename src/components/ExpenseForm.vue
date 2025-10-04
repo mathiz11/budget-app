@@ -90,25 +90,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import type { Category, Expense, ExpenseFormData } from '@/types'
 import { useBudgetStore } from '@/stores/budgetStore'
 
 const budgetStore = useBudgetStore()
 
-const props = defineProps<{
+defineProps<{
   categories: Category[]
-  expense?: Expense
 }>()
 
 const emit = defineEmits<{
   submit: [data: ExpenseFormData]
+  update: [expenseId: string, data: ExpenseFormData]
 }>()
 
 const modal = ref<HTMLDialogElement | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 const editMode = ref(false)
+const editingExpenseId = ref<string | null>(null)
 
 const formData = ref<ExpenseFormData>({
   amount: null,
@@ -117,22 +118,22 @@ const formData = ref<ExpenseFormData>({
   date: new Date().toISOString().split('T')[0]
 })
 
-watch(
-  () => props.expense,
-  (expense) => {
-    if (expense) {
-      editMode.value = true
-      formData.value = {
-        amount: expense.amount,
-        categoryId: expense.categoryId,
-        description: expense.description,
-        date: expense.date.split('T')[0]
-      }
-    }
-  }
-)
-
 const openModal = () => {
+  editMode.value = false
+  editingExpenseId.value = null
+  resetForm()
+  modal.value?.showModal()
+}
+
+const openModalForEdit = (expense: Expense) => {
+  editMode.value = true
+  editingExpenseId.value = expense.id
+  formData.value = {
+    amount: expense.amount,
+    categoryId: expense.categoryId,
+    description: expense.description,
+    date: expense.date.split('T')[0]
+  }
   modal.value?.showModal()
 }
 
@@ -149,6 +150,7 @@ const resetForm = () => {
     date: new Date().toISOString().split('T')[0]
   }
   editMode.value = false
+  editingExpenseId.value = null
   error.value = null
 }
 
@@ -162,7 +164,11 @@ const handleSubmit = async () => {
       return
     }
 
-    emit('submit', formData.value)
+    if (editMode.value && editingExpenseId.value) {
+      emit('update', editingExpenseId.value, formData.value)
+    } else {
+      emit('submit', formData.value)
+    }
     closeModal()
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Une erreur est survenue'
@@ -172,6 +178,7 @@ const handleSubmit = async () => {
 }
 
 defineExpose({
-  openModal
+  openModal,
+  openModalForEdit
 })
 </script>

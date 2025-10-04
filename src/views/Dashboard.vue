@@ -46,6 +46,7 @@
             ref="expenseForm"
             :categories="budgetStore.categories"
             @submit="handleAddExpense"
+            @update="handleUpdateExpense"
           />
           <button
             @click="categoryModal?.openModal()"
@@ -276,8 +277,17 @@ const handleAddExpense = async (data: ExpenseFormData) => {
 }
 
 const handleEditExpense = async (expense: Expense) => {
-  // TODO: Implement edit expense
-  console.log('Edit expense:', expense)
+  expenseForm.value?.openModalForEdit(expense)
+}
+
+const handleUpdateExpense = async (expenseId: string, data: ExpenseFormData) => {
+  if (!data.amount) return
+  await budgetStore.updateExpense(expenseId, {
+    categoryId: data.categoryId,
+    amount: data.amount,
+    description: data.description,
+    date: data.date
+  })
 }
 
 const handleDeleteExpense = async (expenseId: string) => {

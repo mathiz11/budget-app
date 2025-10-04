@@ -38,13 +38,7 @@
           <label class="label">
             <span class="label-text">Icône (emoji)</span>
           </label>
-          <input
-            v-model="formData.icon"
-            type="text"
-            placeholder="🍔"
-            class="input input-bordered"
-            maxlength="2"
-          />
+          <input v-model="formData.icon" type="text" class="input input-bordered" maxlength="2" />
         </div>
 
         <div v-if="error" class="alert alert-error">

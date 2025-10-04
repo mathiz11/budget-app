@@ -18,7 +18,7 @@
             />
           </svg>
         </div>
-        <div class="stat-title">Revenu</div>
+        <div class="stat-title">Budget</div>
         <div class="stat-value text-primary">{{ formatCurrency(summary.revenue) }}</div>
         <div class="stat-actions">
           <button @click="$emit('edit-revenue')" class="btn btn-sm btn-ghost">
